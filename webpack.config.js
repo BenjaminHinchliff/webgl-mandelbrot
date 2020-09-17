@@ -12,6 +12,9 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'app'),
         }),
-        new HtmlWebpackPlugin(),
+        new HtmlWebpackPlugin({
+            title: "Web Mandelbrot",
+            template: "src/index.html",
+        }),
     ],
 };
