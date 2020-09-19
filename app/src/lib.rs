@@ -6,11 +6,35 @@ use web_sys::{
     WebGlUniformLocation,
 };
 
+struct UniformLocs {
+    aspect: WebGlUniformLocation,
+    max_iter: WebGlUniformLocation,
+    zoom: WebGlUniformLocation,
+    offset: WebGlUniformLocation,
+}
+
+impl UniformLocs {
+    fn new(ctx: &WebGlRenderingContext, program: &WebGlProgram) -> Result<UniformLocs, String> {
+        if let [aspect, max_iter, zoom, offset] = &["aspect", "max_iter", "zoom", "offset"].iter().map(|uniform| -> Result<WebGlUniformLocation, String> {
+            ctx.get_uniform_location(&program, uniform).ok_or_else(|| String::from("unable to find uniform ") + uniform)
+        }).collect::<Vec<_>>()[..] {
+            Ok(UniformLocs {
+                aspect: aspect.clone()?,
+                max_iter: max_iter.clone()?,
+                zoom: zoom.clone()?,
+                offset: offset.clone()?,
+            })
+        } else {
+            Err(String::from("invalid match pattern... somehow?"))
+        }
+    }
+}
+
 #[wasm_bindgen]
 pub struct Mandelbrot {
     canvas: HtmlCanvasElement,
     ctx: WebGlRenderingContext,
-    aspect_loc: WebGlUniformLocation,
+    locs: UniformLocs,
     program: WebGlProgram,
     idx_buffer: WebGlBuffer,
     indices: Vec<u16>,
@@ -33,17 +57,16 @@ impl Mandelbrot {
         let frag_shader = compile_shader(&ctx, WebGlRenderingContext::FRAGMENT_SHADER, frag_src)?;
         let program = link_program(&ctx, &[vert_shader, frag_shader])?;
         ctx.use_program(Some(&program));
-        let aspect_loc = ctx
-            .get_uniform_location(&program, "aspect")
-            .ok_or_else(|| "unable to find aspect uniform")?;
+        
+        let locs = UniformLocs::new(&ctx, &program)?;
         ctx.uniform1f(
-            Some(&aspect_loc),
+            Some(&locs.aspect),
             canvas.width() as f32 / canvas.height() as f32,
         );
-        ctx.uniform1i(ctx.get_uniform_location(&program, "max_iter").as_ref(), 50);
-        ctx.uniform1f(ctx.get_uniform_location(&program, "zoom").as_ref(), 2.0);
+        ctx.uniform1i(Some(&locs.max_iter), 50);
+        ctx.uniform1f(Some(&locs.zoom), 2.0);
         ctx.uniform2f(
-            ctx.get_uniform_location(&program, "offset").as_ref(),
+            Some(&locs.offset),
             3.0 / 4.0,
             1.0 / 2.0,
         );
@@ -134,7 +157,7 @@ impl Mandelbrot {
         Ok(Mandelbrot {
             canvas,
             ctx,
-            aspect_loc,
+            locs,
             program,
             idx_buffer,
             indices,
@@ -165,7 +188,7 @@ impl Mandelbrot {
     pub fn resize_viewport(&mut self) {
         self.ctx.use_program(Some(&self.program));
         self.ctx.uniform1f(
-            Some(&self.aspect_loc),
+            Some(&self.locs.aspect),
             self.canvas.width() as f32 / self.canvas.height() as f32,
         );
         self.ctx.viewport(

@@ -6,8 +6,6 @@ uniform int max_iter;
 uniform float zoom;
 uniform vec2 offset;
 
-const int MAX_MAX_ITER = 10000;
-
 const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
 vec3 hsv2rgb(vec3 c)
 {
@@ -23,12 +21,17 @@ void square_plus_c(inout vec2 z, in vec2 c)
 	z += c;
 }
 
+const int MAX_MAX_ITER = 10000;
+
 int mandelbrot(in vec2 point, out vec2 z)
 {
 	z = vec2(0.0, 0.0);
 	for (int i = 0; i < MAX_MAX_ITER; ++i)
 	{
-        if (i >= max_iter) break;
+        if (i >= max_iter)
+		{
+			break;	
+		}
 		if (length(z) > 20.0)
 		{
 			return i;
@@ -60,6 +63,5 @@ void main()
 	position *= zoom;
 	position.x *= aspect;
 	float mu = mandelbrot_renorm(position);
-	float iter = mu / float(max_iter);
-	gl_FragColor = vec4(iter >= 1.0 ? vec3(0.0) : hsv2rgb(vec3(iter, 1.0, 1.0)), 1.0);
+	gl_FragColor = vec4(mu >= float(max_iter) ? vec3(0.0) : hsv2rgb(vec3(mu / 20.0, 1.0, 1.0)), 1.0);
 }

@@ -3,7 +3,8 @@ attribute vec2 aTexCoord;
 
 varying vec2 texCoord;
 
-void main() {
+void main() 
+{
     gl_Position = position;
     texCoord = aTexCoord;
 }
