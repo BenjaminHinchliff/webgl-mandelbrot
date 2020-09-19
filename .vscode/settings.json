@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
+        "Srcs",
         "bindgen",
-        "wasm"
+        "wasm",
+        "webgl"
     ]
 }
