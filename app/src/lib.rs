@@ -1,11 +1,13 @@
 use log::{info, Level};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlCanvasElement, WebGlProgram, WebGlBuffer, WebGlRenderingContext, WebGlShader};
+use web_sys::{HtmlCanvasElement, WebGlProgram, WebGlBuffer, WebGlUniformLocation, WebGlRenderingContext, WebGlShader};
 
 #[wasm_bindgen]
 pub struct Mandelbrot {
+    canvas: HtmlCanvasElement,
     ctx: WebGlRenderingContext,
+    aspect_loc: WebGlUniformLocation,
     program: WebGlProgram,
     idx_buffer: WebGlBuffer,
     indices: Vec<u16>,
@@ -28,7 +30,8 @@ impl Mandelbrot {
         let frag_shader = compile_shader(&ctx, WebGlRenderingContext::FRAGMENT_SHADER, frag_src)?;
         let program = link_program(&ctx, &[vert_shader, frag_shader])?;
         ctx.use_program(Some(&program));
-        ctx.uniform1f(ctx.get_uniform_location(&program, "aspect").as_ref(), canvas.width() as f32 / canvas.height() as f32);
+        let aspect_loc = ctx.get_uniform_location(&program, "aspect").ok_or_else(|| "unable to find aspect uniform")?;
+        ctx.uniform1f(Some(&aspect_loc), canvas.width() as f32 / canvas.height() as f32);
         ctx.uniform1i(ctx.get_uniform_location(&program, "max_iter").as_ref(), 50);
         ctx.uniform1f(ctx.get_uniform_location(&program, "zoom").as_ref(), 2.0);
         ctx.uniform2f(ctx.get_uniform_location(&program, "offset").as_ref(), 3.0 / 4.0, 1.0 / 2.0);
@@ -112,7 +115,9 @@ impl Mandelbrot {
         info!("mandelbrot setup");
 
         Ok(Mandelbrot {
+            canvas,
             ctx,
+            aspect_loc,
             program,
             idx_buffer,
             indices,
@@ -133,6 +138,13 @@ impl Mandelbrot {
         );
 
         self.ctx.bind_buffer(WebGlRenderingContext::ELEMENT_ARRAY_BUFFER, None);
+        self.ctx.use_program(None);
+    }
+
+    pub fn resize_viewport(&mut self) {
+        self.ctx.use_program(Some(&self.program));
+        self.ctx.uniform1f(Some(&self.aspect_loc), self.canvas.width() as f32 / self.canvas.height() as f32);
+        self.ctx.viewport(0, 0, self.canvas.width() as i32, self.canvas.height() as i32);
         self.ctx.use_program(None);
     }
 }

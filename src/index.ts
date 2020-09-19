@@ -10,6 +10,12 @@ async function main() {
     const { Mandelbrot } = await import('../app/pkg');
     const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc);
     mandelbrot.draw();
+    window.onresize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        mandelbrot.resize_viewport();
+        mandelbrot.draw();
+    };
 }
 
 main();
