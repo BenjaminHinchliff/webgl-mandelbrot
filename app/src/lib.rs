@@ -30,6 +30,8 @@ impl Mandelbrot {
         ctx.use_program(Some(&program));
         ctx.uniform1f(ctx.get_uniform_location(&program, "aspect").as_ref(), canvas.width() as f32 / canvas.height() as f32);
         ctx.uniform1i(ctx.get_uniform_location(&program, "max_iter").as_ref(), 50);
+        ctx.uniform1f(ctx.get_uniform_location(&program, "zoom").as_ref(), 2.0);
+        ctx.uniform2f(ctx.get_uniform_location(&program, "offset").as_ref(), 3.0 / 4.0, 1.0 / 2.0);
 
         let verts = vec![
             -1.0, -1.0, // bottom left
