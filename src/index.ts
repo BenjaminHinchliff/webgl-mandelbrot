@@ -10,6 +10,7 @@ const START_X = 1.0;
 const START_Y = 0.0;
 const ZOOM_INCREMENT = 1.0 / 1000.0;
 const ITERATIONS = 500;
+const SCROLL_SCALING = 8.0;
 
 async function main() {
     const canvas = document.getElementById("screen") as HTMLCanvasElement | null;
@@ -29,44 +30,30 @@ async function main() {
         }
     }
     throttledDraw();
-    window.addEventListener('resize', () => {
+    // browser controls
+    canvas.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         mandelbrot.resize_viewport();
         throttledDraw();
     });
-    window.addEventListener('wheel', (e) => {
+    canvas.addEventListener('wheel', (e) => {
         const change = -e.deltaY * ZOOM_INCREMENT * mandelbrot.zoom;
         mandelbrot.zoom += change;
         mandelbrot.zoom = Math.max(mandelbrot.zoom, MIN_ZOOM);
         mandelbrot.refresh_zoom();
         throttledDraw();
     });
-    let mouseIsDown = false;
-    window.addEventListener('mousedown', () => {
-        mouseIsDown = true;
-    });
-    window.addEventListener('mouseup', () => {
-        mouseIsDown = false;
-    });
-    window.addEventListener('mousemove', (e) => {
-        if (mouseIsDown) {
-            const { movementX: dx, movementY: dy } = e;
-            mandelbrot.x_pos += dx / window.innerWidth / mandelbrot.zoom;
-            mandelbrot.y_pos -= dy / window.innerHeight / mandelbrot.zoom;
-            mandelbrot.refresh_position();
-            throttledDraw();
-        }
-    });
-    const hammer = new Hammer(document.body);
+    // mobile controls
+    const hammer = new Hammer(canvas);
     const pan = new Hammer.Pan();
     const pinch = new Hammer.Pinch();
     hammer.add(pan);
     hammer.add(pinch);
     hammer.on('pan', (e) => {
         const { velocityX: dx, velocityY: dy, deltaTime: dt } = e;
-        mandelbrot.x_pos += dx / window.innerWidth / mandelbrot.zoom * 10;
-        mandelbrot.y_pos -= dy / window.innerHeight / mandelbrot.zoom * 10;
+        mandelbrot.x_pos += dx / window.innerWidth / mandelbrot.zoom * SCROLL_SCALING;
+        mandelbrot.y_pos -= dy / window.innerHeight / mandelbrot.zoom * SCROLL_SCALING;
         mandelbrot.refresh_position();
         throttledDraw();
     });
@@ -85,7 +72,7 @@ async function main() {
             mandelbrot.refresh_zoom();
             throttledDraw();
         }
-    })
+    });
 }
 
 main();
