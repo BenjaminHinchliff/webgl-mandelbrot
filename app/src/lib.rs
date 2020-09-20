@@ -52,7 +52,9 @@ impl Mandelbrot {
         zoom: f32,
         x_pos: f32,
         y_pos: f32,
+        iters: i32,
     ) -> Result<Mandelbrot, JsValue> {
+        assert!(iters <= 10_000, "Due to fragment shader setup, you cannot have more than 10k iterations");
         let ctx = canvas
             .get_context("webgl")?
             .unwrap()
@@ -68,7 +70,7 @@ impl Mandelbrot {
             Some(&locs.aspect),
             canvas.width() as f32 / canvas.height() as f32,
         );
-        ctx.uniform1i(Some(&locs.max_iter), 500);
+        ctx.uniform1i(Some(&locs.max_iter), iters);
         ctx.uniform1f(Some(&locs.zoom), zoom);
         ctx.uniform2f(
             Some(&locs.offset),
@@ -76,6 +78,8 @@ impl Mandelbrot {
             y_pos,
         );
 
+        // code to setup the full-screen square for the fragment
+        // shader render onto
         let verts = vec![
             -1.0, -1.0, // bottom left
             1.0, -1.0, // bottom right
@@ -176,8 +180,6 @@ impl Mandelbrot {
             WebGlRenderingContext::ELEMENT_ARRAY_BUFFER,
             Some(&self.idx_buffer),
         );
-        self.ctx.clear_color(0.0, 0.0, 0.0, 1.0);
-        self.ctx.clear(WebGlRenderingContext::COLOR_BUFFER_BIT);
 
         self.ctx.draw_elements_with_i32(
             WebGlRenderingContext::TRIANGLES,
