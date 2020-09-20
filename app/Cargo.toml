@@ -3,6 +3,9 @@ name = "app"
 version = "0.1.0"
 authors = ["Benjamin Hinchliff <benjamin.hinchliff@gmail.com>"]
 edition = "2018"
+description = "a mandelbrot set renderer written in WebGL and Rust (mostly)"
+license = "MIT"
+repository = "https://github.com/BenjaminHinchliff/webgl-mandelbrot.git"
 
 [lib]
 crate-type = ["cdylib"]
