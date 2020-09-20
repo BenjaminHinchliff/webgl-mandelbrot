@@ -4,7 +4,8 @@ This one has been a bit of a headache to make. Not the actual rendering of the s
 
 Anyway, it's a renderer that lets you explore the mandelbrot set with your GPU by dragging around and scrolling, accelerated by WebGL, meaning so long as you have semi-decent GPU hardware, you can get a very smooth experience. Oh also I wrote the core of the code in Rust. Slight disclaimer though: you can't zoom in that far because floating point precision starts to have some issues and turn the visualization into a block mess. Sorry, but there's not much I can do about that.
 
-It's not deployed anywhere as of now, but I'm working on getting it deployed to github pages really soon.
+## Usage
+https://benjaminhinchliff.github.io/webgl-mandelbrot/
 
 ## Testing/Compilation
 To run the development server use:
