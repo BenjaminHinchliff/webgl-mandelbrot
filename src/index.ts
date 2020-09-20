@@ -20,7 +20,7 @@ async function main() {
     const { Mandelbrot } = await import('../app/pkg');
     const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc, START_ZOOM, START_X, START_Y, ITERATIONS);
     let frameRequested = false;
-    const throttledDraw = () => {
+    function throttledDraw() {
         if (!frameRequested) {
             requestAnimationFrame(() => {
                 mandelbrot.draw();
@@ -72,6 +72,25 @@ async function main() {
             mandelbrot.refresh_zoom();
             throttledDraw();
         }
+    });
+    const iterSlider = document.getElementById('iter-slider') as HTMLInputElement;
+    const iterInput = document.getElementById('iter-input') as HTMLInputElement;
+    if (!iterSlider || !iterInput) throw new Error('failed to get iter slider and input');
+    function iterChanged(value: number) {
+        mandelbrot.iters = value;
+        mandelbrot.refresh_iters();
+        throttledDraw();
+    }
+    iterSlider.addEventListener('input', (e) => {
+        const { value } = (e.target as HTMLInputElement);
+        iterInput.value = value;
+        iterChanged(parseInt(value));
+    });
+    iterInput.addEventListener('input', (e) => {
+        const value = Math.max(Math.min(1000, parseInt((e.target as HTMLInputElement).value || '0')), 1);
+        iterInput.value = value.toString();
+        iterSlider.value = iterInput.value;
+        iterChanged(value);
     });
 }
 

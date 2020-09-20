@@ -40,6 +40,7 @@ pub struct Mandelbrot {
     pub zoom: f32,
     pub x_pos: f32,
     pub y_pos: f32,
+    pub iters: i32,
 }
 
 #[wasm_bindgen]
@@ -170,7 +171,8 @@ impl Mandelbrot {
             indices,
             zoom,
             x_pos,
-            y_pos
+            y_pos,
+            iters,
         })
     }
 
@@ -221,6 +223,12 @@ impl Mandelbrot {
             self.x_pos,
             self.y_pos,
         );
+        self.ctx.use_program(None);
+    }
+
+    pub fn refresh_iters(&self) {
+        self.ctx.use_program(Some(&self.program));
+        self.ctx.uniform1i(Some(&self.locs.max_iter), self.iters);
         self.ctx.use_program(None);
     }
 }
