@@ -1,5 +1,7 @@
 # An Explorable WebGL Mandelbrot Renderer
 
+![](1280x640-webgl-mandelbrot.jpeg)
+
 This one has been a bit of a headache to make. Not the actual rendering of the set, but making it so you can drag and zoom was a bit trickly. Oh and sorry mobile users, because you can't zoom in (yet). I'll get onto that once I figure out an intuitive, cross-platform way to do it. Maybe hammer.js.
 
 Anyway, it's a renderer that lets you explore the mandelbrot set with your GPU by dragging around and scrolling, accelerated by WebGL, meaning so long as you have semi-decent GPU hardware, you can get a very smooth experience. Oh also I wrote the core of the code in Rust. Slight disclaimer though: you can't zoom in that far because floating point precision starts to have some issues and turn the visualization into a block mess. Sorry, but there's not much I can do about that.
