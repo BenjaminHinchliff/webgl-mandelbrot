@@ -3,6 +3,7 @@
         "Srcs",
         "bindgen",
         "coord",
+        "msapplication",
         "verts",
         "wasm",
         "webgl"

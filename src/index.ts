@@ -1,3 +1,5 @@
+import Hammer from "hammerjs";
+
 import "./index.css";
 import vertSrc from "../shaders/basic.vert";
 import fragSrc from "../shaders/basic.frag";
@@ -56,6 +58,34 @@ async function main() {
             throttledDraw();
         }
     });
+    const hammer = new Hammer(document.body);
+    const pan = new Hammer.Pan();
+    const pinch = new Hammer.Pinch();
+    hammer.add(pan);
+    hammer.add(pinch);
+    hammer.on('pan', (e) => {
+        const { velocityX: dx, velocityY: dy, deltaTime: dt } = e;
+        mandelbrot.x_pos += dx / window.innerWidth / mandelbrot.zoom * 10;
+        mandelbrot.y_pos -= dy / window.innerHeight / mandelbrot.zoom * 10;
+        mandelbrot.refresh_position();
+        throttledDraw();
+    });
+    let lastScale: number | undefined;
+    hammer.on('pinch', (e) => {
+        const { scale } = e;
+        if (!lastScale) {
+            lastScale = scale;
+        }
+        const ds = scale - lastScale;
+        console.log(ds);
+        lastScale = scale;
+        if (Math.abs(ds) < 0.5) {
+            mandelbrot.zoom += ds * mandelbrot.zoom;
+            mandelbrot.zoom = Math.max(mandelbrot.zoom, MIN_ZOOM);
+            mandelbrot.refresh_zoom();
+            throttledDraw();
+        }
+    })
 }
 
 main();
