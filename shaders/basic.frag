@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 varying vec2 texCoord;
 
 uniform float aspect;
@@ -59,9 +59,10 @@ float mandelbrot_renorm(in vec2 point)
 void main()
 {
 	vec2 position = texCoord;
-	position -= offset;
-	position *= 1.0 / zoom;
 	position.x *= aspect;
+	position -= vec2(0.5, 0.5);
+	position *= (1.0 / zoom);
+	position -= offset;
 	float mu = mandelbrot_renorm(position);
 	gl_FragColor = vec4(mu >= float(max_iter) ? vec3(0.0) : hsv2rgb(vec3(mu / 20.0, 1.0, 1.0)), 1.0);
 }

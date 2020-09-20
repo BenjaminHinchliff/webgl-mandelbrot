@@ -38,6 +38,8 @@ pub struct Mandelbrot {
     idx_buffer: WebGlBuffer,
     indices: Vec<u16>,
     pub zoom: f32,
+    pub x_pos: f32,
+    pub y_pos: f32,
 }
 
 #[wasm_bindgen]
@@ -48,6 +50,8 @@ impl Mandelbrot {
         vert_src: &str,
         frag_src: &str,
         zoom: f32,
+        x_pos: f32,
+        y_pos: f32,
     ) -> Result<Mandelbrot, JsValue> {
         let ctx = canvas
             .get_context("webgl")?
@@ -64,12 +68,12 @@ impl Mandelbrot {
             Some(&locs.aspect),
             canvas.width() as f32 / canvas.height() as f32,
         );
-        ctx.uniform1i(Some(&locs.max_iter), 50);
+        ctx.uniform1i(Some(&locs.max_iter), 500);
         ctx.uniform1f(Some(&locs.zoom), zoom);
         ctx.uniform2f(
             Some(&locs.offset),
-            3.0 / 4.0,
-            1.0 / 2.0,
+            x_pos,
+            y_pos,
         );
 
         let verts = vec![
@@ -160,7 +164,9 @@ impl Mandelbrot {
             program,
             idx_buffer,
             indices,
-            zoom
+            zoom,
+            x_pos,
+            y_pos
         })
     }
 
@@ -203,6 +209,16 @@ impl Mandelbrot {
     pub fn refresh_zoom(&self) {
         self.ctx.use_program(Some(&self.program));
         self.ctx.uniform1f(Some(&self.locs.zoom), self.zoom);
+        self.ctx.use_program(None);
+    }
+
+    pub fn refresh_position(&self) {
+        self.ctx.use_program(Some(&self.program));
+        self.ctx.uniform2f(
+            Some(&self.locs.offset),
+            self.x_pos,
+            self.y_pos,
+        );
         self.ctx.use_program(None);
     }
 }

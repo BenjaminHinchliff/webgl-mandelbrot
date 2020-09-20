@@ -8,7 +8,7 @@ async function main() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const { Mandelbrot } = await import('../app/pkg');
-    const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc, 0.5);
+    const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc, 0.5, 1.0, 0.0);
     let frameRequested = false;
     const throttledDraw = () => {
         if (!frameRequested) {
@@ -27,11 +27,27 @@ async function main() {
         throttledDraw();
     });
     window.addEventListener('wheel', (e) => {
-        const change = -e.deltaY / 1000;
+        const change = -e.deltaY / 1000 * mandelbrot.zoom;
         mandelbrot.zoom += change;
         mandelbrot.zoom = Math.max(mandelbrot.zoom, 0.1);
         mandelbrot.refresh_zoom();
         throttledDraw();
+    });
+    let mouseIsDown = false;
+    window.addEventListener('mousedown', () => {
+        mouseIsDown = true;
+    });
+    window.addEventListener('mouseup', () => {
+        mouseIsDown = false;
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (mouseIsDown) {
+            const { movementX: dx, movementY: dy } = e;
+            mandelbrot.x_pos += dx / window.innerWidth / mandelbrot.zoom;
+            mandelbrot.y_pos -= dy / window.innerHeight / mandelbrot.zoom;
+            mandelbrot.refresh_position();
+            throttledDraw();
+        }
     });
 }
 
