@@ -207,11 +207,6 @@ impl Mandelbrot {
     }
 }
 
-#[wasm_bindgen(start)]
-pub fn initialize() {
-    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-}
-
 fn compile_shader(
     ctx: &WebGlRenderingContext,
     shader_type: u32,
@@ -261,4 +256,9 @@ fn link_program(
             .get_program_info_log(&program)
             .unwrap_or_else(|| String::from("Unknown error creating program object")))
     }
+}
+
+#[wasm_bindgen(start)]
+pub fn initialize() {
+    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
 }
