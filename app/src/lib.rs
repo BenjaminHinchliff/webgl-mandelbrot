@@ -1,4 +1,3 @@
-use log::{info, Level};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
@@ -38,6 +37,7 @@ pub struct Mandelbrot {
     program: WebGlProgram,
     idx_buffer: WebGlBuffer,
     indices: Vec<u16>,
+    pub zoom: f32,
 }
 
 #[wasm_bindgen]
@@ -47,6 +47,7 @@ impl Mandelbrot {
         canvas: HtmlCanvasElement,
         vert_src: &str,
         frag_src: &str,
+        zoom: f32,
     ) -> Result<Mandelbrot, JsValue> {
         let ctx = canvas
             .get_context("webgl")?
@@ -64,7 +65,7 @@ impl Mandelbrot {
             canvas.width() as f32 / canvas.height() as f32,
         );
         ctx.uniform1i(Some(&locs.max_iter), 50);
-        ctx.uniform1f(Some(&locs.zoom), 2.0);
+        ctx.uniform1f(Some(&locs.zoom), zoom);
         ctx.uniform2f(
             Some(&locs.offset),
             3.0 / 4.0,
@@ -152,8 +153,6 @@ impl Mandelbrot {
 
         ctx.use_program(None);
 
-        info!("mandelbrot setup");
-
         Ok(Mandelbrot {
             canvas,
             ctx,
@@ -161,6 +160,7 @@ impl Mandelbrot {
             program,
             idx_buffer,
             indices,
+            zoom
         })
     }
 
@@ -199,17 +199,17 @@ impl Mandelbrot {
         );
         self.ctx.use_program(None);
     }
+
+    pub fn refresh_zoom(&self) {
+        self.ctx.use_program(Some(&self.program));
+        self.ctx.uniform1f(Some(&self.locs.zoom), self.zoom);
+        self.ctx.use_program(None);
+    }
 }
 
 #[wasm_bindgen(start)]
 pub fn initialize() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-    console_log::init_with_level(if cfg!(debug_assertions) {
-        Level::Debug
-    } else {
-        Level::Error
-    })
-    .expect("failed to init logging");
 }
 
 fn compile_shader(

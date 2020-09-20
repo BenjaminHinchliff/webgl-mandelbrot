@@ -60,7 +60,7 @@ void main()
 {
 	vec2 position = texCoord;
 	position -= offset;
-	position *= zoom;
+	position *= 1.0 / zoom;
 	position.x *= aspect;
 	float mu = mandelbrot_renorm(position);
 	gl_FragColor = vec4(mu >= float(max_iter) ? vec3(0.0) : hsv2rgb(vec3(mu / 20.0, 1.0, 1.0)), 1.0);

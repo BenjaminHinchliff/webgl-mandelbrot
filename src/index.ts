@@ -8,14 +8,31 @@ async function main() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     const { Mandelbrot } = await import('../app/pkg');
-    const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc);
-    mandelbrot.draw();
-    window.onresize = () => {
+    const mandelbrot = new Mandelbrot(canvas, vertSrc, fragSrc, 0.5);
+    let frameRequested = false;
+    const throttledDraw = () => {
+        if (!frameRequested) {
+            requestAnimationFrame(() => {
+                mandelbrot.draw();
+                frameRequested = false;
+            });
+            frameRequested = true;
+        }
+    }
+    throttledDraw();
+    window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         mandelbrot.resize_viewport();
-        mandelbrot.draw();
-    };
+        throttledDraw();
+    });
+    window.addEventListener('wheel', (e) => {
+        const change = -e.deltaY / 1000;
+        mandelbrot.zoom += change;
+        mandelbrot.zoom = Math.max(mandelbrot.zoom, 0.1);
+        mandelbrot.refresh_zoom();
+        throttledDraw();
+    });
 }
 
 main();
